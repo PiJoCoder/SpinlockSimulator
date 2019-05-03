@@ -27,7 +27,7 @@ BOOL GetLock(
 void ReleaseLock( void *)
 {
 	//sleep an arbitrarily hard-coded time
-	Sleep(7000);
+	Sleep(5000);
 
 	//set the value to 0 so the lock is released and spinlock acquires the lock
 	lockValue = 0; 
