@@ -24,18 +24,18 @@ BOOL GetLock(
 	return oldId == 0;
 }
 
-void ReleaseLock( void *)
+void ReleaseLock(void*)
 {
 	//sleep an arbitrarily hard-coded time
 	Sleep(5000);
 
 	//set the value to 0 so the lock is released and spinlock acquires the lock
-	lockValue = 0; 
+	lockValue = 0;
 
 }
 
 void
-SpinToAcquireLockWithExponentialBackoff(__in DWORD Id, __out UINT32 * BackoffCount)			
+SpinToAcquireLockWithExponentialBackoff(__in DWORD Id, __out UINT32* BackoffCount)
 {
 
 	UINT32	Backoffs = 0;
@@ -52,8 +52,8 @@ SpinToAcquireLockWithExponentialBackoff(__in DWORD Id, __out UINT32 * BackoffCou
 		//
 		for (iSpin = 0; iSpin < spinLimit; iSpin++)
 		{
-	
-			_mm_pause(); 
+
+			_mm_pause();
 		}
 
 		//printf_s("iSpin = %ld\n", iSpin);
@@ -80,7 +80,7 @@ SpinToAcquireLockWithExponentialBackoff(__in DWORD Id, __out UINT32 * BackoffCou
 	}
 
 	//output the final backoffs
-	*BackoffCount = Backoffs; 
+	*BackoffCount = Backoffs;
 
 } // SpinToAcquireLockWithExponentialBackoff
 
@@ -96,10 +96,10 @@ void ExerciseSpinLockCode()
 	//get start times
 	QueryPerformanceCounter(&beforeHighRes);
 	long int before = GetTickCount();
-	
+
 	//invoke Spinlock code
 	SpinToAcquireLockWithExponentialBackoff(GetCurrentThreadId(), &backoffCount);
-	
+
 	//get the end times
 	long int after = GetTickCount();
 	QueryPerformanceCounter(&afterHighRes);
@@ -108,16 +108,16 @@ void ExerciseSpinLockCode()
 	//calculate microseconds
 	//ticks divided by ticks-per-second (frequency) , gives us seconds
 	//converted to microseconds by multiplying to 1 mil
-	
+
 	elapsedMicroseconds.QuadPart = (afterHighRes.QuadPart - beforeHighRes.QuadPart);
-	elapsedMicroseconds.QuadPart *= 1000000;  
+	elapsedMicroseconds.QuadPart *= 1000000;
 	elapsedMicroseconds.QuadPart /= frequency.QuadPart;
 
 	UINT64 SpinsPerMillisecond = (globalSpins) / (after - before);
 
 	printf_s("SpinToAcquireLockWithExponentialBackoff: Milliseconds elapsed = %ld, Spins=%I64d, Backoffs=%ld\n", after - before, globalSpins, backoffCount);
 	printf_s("SpinToAcquireLockWithExponentialBackoff: Spins/Millisecond=%I64d\n", SpinsPerMillisecond);
-	printf_s("SpinToAcquireLockWithExponentialBackoff: Spins/Millisecond(QPC)=%I64d\n", globalSpins/(elapsedMicroseconds.QuadPart/1000));
+	printf_s("SpinToAcquireLockWithExponentialBackoff: Spins/Millisecond(QPC)=%I64d\n", globalSpins / (elapsedMicroseconds.QuadPart / 1000));
 
 	//wait on the thread completion
 	WaitForSingleObject(hThread, INFINITE);
@@ -125,13 +125,13 @@ void ExerciseSpinLockCode()
 
 void ExerciseSimpleLoopCode()
 {
-	long i=0;
+	long i = 0;
 	LARGE_INTEGER beforeHighRes, afterHighRes, elapsedMicroseconds, frequency;
-	
+
 	QueryPerformanceCounter(&beforeHighRes);
 
 	//loop, no pause
-	for (i; i < MAX_SPIN*10; i++)
+	for (i; i < MAX_SPIN * 10; i++)
 	{
 		;
 	}
@@ -140,7 +140,7 @@ void ExerciseSimpleLoopCode()
 	QueryPerformanceCounter(&afterHighRes);
 	QueryPerformanceFrequency(&frequency);
 
-	
+
 	//https://docs.microsoft.com/en-us/windows/desktop/SysInfo/acquiring-high-resolution-time-stamps
 	elapsedMicroseconds.QuadPart = (afterHighRes.QuadPart - beforeHighRes.QuadPart);
 	elapsedMicroseconds.QuadPart *= 1000000;
@@ -165,4 +165,3 @@ int main()
 
 	return 0;
 }
-
